@@ -15,30 +15,49 @@ class Map:
         # create room adjacent to exits if one does not already exist
 
         current_room_coords = self.map_start_coords
-        self.rooms[current_room_coords] = Room(exits=self.get_random_exits(max_exits=4))
+        self.rooms[current_room_coords] = Room(exits=self.get_random_exits(min_exits=1, max_exits=3))
 
         current_room = self.rooms[current_room_coords]
         for exit in current_room.exits:
-            adjacent_room_coords = self.add_coords(current_room_coords, self.get_adjacent_room_offset(exit))
-            self.rooms[adjacent_room_coords] = Room()
+            adjacent_room_coords = self.get_adjacent_room_coords(current_room_coords, exit)
+            try:
+                adjacent_room = self.rooms[adjacent_room_coords]
+            except KeyError:
+                self.rooms[adjacent_room_coords] = Room(exits=self.get_random_exits(min_exits=2, max_exits=3))
+                adjacent_room = self.rooms[adjacent_room_coords]
+                opposing_exit = self.get_opposing_exit(exit)
+                if not opposing_exit in adjacent_room.exits:
+                    adjacent_room.create_exit(opposing_exit)
 
-    def add_coords(self, coords1: tuple, coords2: tuple):
+    def sum_coords(self, coords1: tuple, coords2: tuple):
         return (coords1[0] + coords2[0], coords1[1] + coords2[1])
 
-    def get_random_exits(self, max_exits: int = 4):
-        return random.sample(('N', 'E', 'S', 'W'), k=random.randrange(1, max_exits + 1))
+    def get_random_exits(self, min_exits: int=1, max_exits: int = 4):
+        return random.sample(('N', 'E', 'S', 'W'), k=random.randrange(min_exits, max_exits + 1))
 
-    def get_adjacent_room_offset(self, exit_direction: str):
+    def get_adjacent_room_coords(self, current_room_coords: tuple, exit_direction: str):
         if exit_direction == 'N':
-            return (0, -1)
+            return self.sum_coords(current_room_coords, (0, -1))
         elif exit_direction == 'E':
-            return (1, 0)
+            return self.sum_coords(current_room_coords, (1, 0))
         elif exit_direction == 'S':
-            return (0, 1)
+            return self.sum_coords(current_room_coords, (0, 1))
         elif exit_direction == 'W':
-            return (-1, 0)
+            return self.sum_coords(current_room_coords, (-1, 0))
         else:
-            return (0, 0)
+            return None
+
+    def get_opposing_exit(self, exit_direction):
+        if exit_direction == 'N':
+            return 'S'
+        elif exit_direction == 'E':
+            return 'W'
+        elif exit_direction == 'S':
+            return 'N'
+        elif exit_direction == 'W':
+            return 'E'
+        else:
+            return None
 
     def print_map(self, x_min: int, y_min: int, x_max: int, y_max: int):
         map_text_rows = []
@@ -78,7 +97,7 @@ class Map:
 
 
 class Room:
-    def __init__(self, exits: list = [], desc: str = ''):
+    def __init__(self, exits: list, desc: str = ''):
         self.exits = exits
         self.desc = desc
 
