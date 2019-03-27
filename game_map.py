@@ -15,19 +15,26 @@ class Map:
         # create room adjacent to exits if one does not already exist
 
         current_room_coords = self.map_start_coords
-        self.rooms[current_room_coords] = Room(exits=self.get_random_exits(min_exits=1, max_exits=3))
-
+        exits = self.get_random_exits(min_exits=1, max_exits=3)
+        self.rooms[current_room_coords] = Room(exits)
         current_room = self.rooms[current_room_coords]
         for exit in current_room.exits:
             adjacent_room_coords = self.get_adjacent_room_coords(current_room_coords, exit)
-            try:
+            if self.check_if_room_exists(adjacent_room_coords):
                 adjacent_room = self.rooms[adjacent_room_coords]
-            except KeyError:
+            else:
                 self.rooms[adjacent_room_coords] = Room(exits=self.get_random_exits(min_exits=2, max_exits=3))
                 adjacent_room = self.rooms[adjacent_room_coords]
                 opposing_exit = self.get_opposing_exit(exit)
                 if not opposing_exit in adjacent_room.exits:
                     adjacent_room.create_exit(opposing_exit)
+
+    def check_if_room_exists(self, coords: tuple):
+        try:
+            if self.rooms[coords]:
+                return True
+        except:
+            return False
 
     def sum_coords(self, coords1: tuple, coords2: tuple):
         return (coords1[0] + coords2[0], coords1[1] + coords2[1])
@@ -65,21 +72,20 @@ class Map:
             map_text_row = ['', '', '', '', '']
             for x in range(x_min, x_max + 1):
                 current_coords = (x, y)
-                try:
-                    if self.rooms[current_coords]:
-                        current_room = self.rooms[current_coords]
-                        n = '  ' if 'N' in current_room.exits else '--'
-                        e = ' ' if 'E' in current_room.exits else '|'
-                        s = '  ' if 'S' in current_room.exits else '--'
-                        w = ' ' if 'W' in current_room.exits else '|'
-                        room_text = [
-                            f'+--{n}--+',
-                            f'|      |',
-                            f'{w}      {e}',
-                            f'|      |',
-                            f'+--{s}--+'
-                        ]
-                except KeyError:
+                if self.check_if_room_exists(current_coords):
+                    current_room = self.rooms[current_coords]
+                    n = '  ' if 'N' in current_room.exits else '--'
+                    e = ' ' if 'E' in current_room.exits else '|'
+                    s = '  ' if 'S' in current_room.exits else '--'
+                    w = ' ' if 'W' in current_room.exits else '|'
+                    room_text = [
+                        f'+--{n}--+',
+                        f'|      |',
+                        f'{w}      {e}',
+                        f'|      |',
+                        f'+--{s}--+'
+                    ]
+                else:
                     room_text = [
                         '        ',
                         '        ',
