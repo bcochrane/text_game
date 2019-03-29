@@ -55,8 +55,8 @@ class Map:
         self.rooms = {}
 
     def generate_map(self):
-        # 1. Create a room.
-        # 2. Create random doors in the current room.
+        # 1. Create a room with random doors.
+        # 2. If the room borders a map edge, remove doors on that side.
         # 3. Check for rooms adjacent to the current room.
         # 4. If adjacent rooms don't have matching doors, remove the
         #    corresponding doors from the current room.
@@ -66,10 +66,19 @@ class Map:
         # 6. Check for rooms adjacent to current room's doors. If they
         #    don't exist, add coordinates to stack.
 
+        # 1. Create a room with random doors.
         current_room_coordinates = self.map_start_coordinates
         doors = generate_random_doors(min_doors=1, max_doors=3)
         self.rooms[current_room_coordinates] = Room(doors)
         current_room = self.rooms[current_room_coordinates]
+
+        # 2. If the room borders a map edge, remove doors on that side.
+        for door_to_remove in self.check_if_room_at_map_edge(
+                current_room_coordinates):
+            current_room.remove_door(door_to_remove)
+
+        # 6. Check for rooms adjacent to current room's doors. If they
+        #    don't exist, add coordinates to stack.
         for door in current_room.doors:
             adjacent_room_coordinates = get_adjacent_room_coordinates(
                 current_room_coordinates, door)
@@ -81,7 +90,23 @@ class Map:
                 adjacent_room = self.rooms[adjacent_room_coordinates]
                 opposing_door = get_opposing_door(door)
                 if opposing_door not in adjacent_room.doors:
-                    adjacent_room.create_door(opposing_door)
+                    adjacent_room.add_door(opposing_door)
+
+    def check_if_room_at_map_edge(self, coordinates: tuple):
+        x, y = coordinates
+        exits_at_map_edge = []
+
+        if x == 0:
+            exits_at_map_edge.append('W')
+        elif x == self.x_size - 1:
+            exits_at_map_edge.append('E')
+
+        if y == 0:
+            exits_at_map_edge.append('N')
+        elif y == self.y_size - 1:
+            exits_at_map_edge.append('S')
+
+        return exits_at_map_edge
 
     def check_if_room_exists(self, coordinates: tuple):
         try:
@@ -131,10 +156,10 @@ class Room:
         self.doors = doors
         self.desc = desc
 
-    def create_door(self, door: str):
+    def add_door(self, door: str):
         if door not in self.doors:
             self.doors.append(door)
 
-    def delete_door(self, door):
+    def remove_door(self, door):
         if door in self.doors:
             self.doors.remove(door)
