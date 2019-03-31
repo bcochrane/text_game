@@ -55,42 +55,50 @@ class Map:
         self.rooms = {}
 
     def generate_map(self):
-        # 1. Create a room with random doors.
-        # 2. If the room borders a map edge, remove doors on that side.
-        # 3. Check for rooms adjacent to the current room.
-        # 4. If adjacent rooms don't have matching doors, remove the
-        #    corresponding doors from the current room.
-        # 5. If the adjacent rooms have doors facing the current room,
-        #    and the current room doesn't have matching doors, add
-        #    matching doors to the current room.
-        # 6. Check for rooms adjacent to current room's doors. If they
-        #    don't exist, add coordinates to stack.
+        # 1. Initialize room stack with starting coordinates
+        room_stack = [self.map_start_coordinates]
 
-        # 1. Create a room with random doors.
-        current_room_coordinates = self.map_start_coordinates
+        # 2. Pop coordinates off room stack.
+        current_room_coordinates = room_stack.pop()
+
+        # 3. Create a room with random doors.
         doors = generate_random_doors(min_doors=1, max_doors=3)
         self.rooms[current_room_coordinates] = Room(doors)
         current_room = self.rooms[current_room_coordinates]
 
-        # 2. If the room borders a map edge, remove doors on that side.
+        # 4. If the room borders a map edge, remove doors on that side.
         for door_to_remove in self.check_if_room_at_map_edge(
                 current_room_coordinates):
             current_room.remove_door(door_to_remove)
 
-        # 6. Check for rooms adjacent to current room's doors. If they
-        #    don't exist, add coordinates to stack.
+        # 5. Check for rooms adjacent to the current room.
+        # 6. If adjacent rooms don't have matching doors, remove the
+        #    corresponding doors from the current room.
+        # 7. If the adjacent rooms have doors facing the current room,
+        #    and the current room doesn't have matching doors, add
+        #    matching doors to the current room.
+        # 8. Check for rooms adjacent to current room's doors. If they
+        #    don't exist, add coordinates to room stack.
+
+
+
+        # check for rooms adjacent to current room's doors
         for door in current_room.doors:
             adjacent_room_coordinates = get_adjacent_room_coordinates(
                 current_room_coordinates, door)
             if self.check_if_room_exists(adjacent_room_coordinates):
                 adjacent_room = self.rooms[adjacent_room_coordinates]
             else:
-                self.rooms[adjacent_room_coordinates] = Room(
-                    doors=generate_random_doors(min_doors=2, max_doors=3))
-                adjacent_room = self.rooms[adjacent_room_coordinates]
-                opposing_door = get_opposing_door(door)
-                if opposing_door not in adjacent_room.doors:
-                    adjacent_room.add_door(opposing_door)
+                # Adjacent room doesn't exist; add its coordinates to
+                # the stack for later room creation.
+                room_stack.append(adjacent_room_coordinates)
+
+                # self.rooms[adjacent_room_coordinates] = Room(
+                #     doors=generate_random_doors(min_doors=2, max_doors=3))
+                # adjacent_room = self.rooms[adjacent_room_coordinates]
+                # opposing_door = get_opposing_door(door)
+                # if opposing_door not in adjacent_room.doors:
+                #     adjacent_room.add_door(opposing_door)
 
     def check_if_room_at_map_edge(self, coordinates: tuple):
         x, y = coordinates
