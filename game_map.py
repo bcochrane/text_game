@@ -58,8 +58,9 @@ class Map:
         self.rooms = {}
 
     def generate_map(self):
-        while len(self.rooms) < 20:
+        while len(self.room_stack) > 0:
             self.add_room()
+            # print(f'len(self.rooms)={len(self.rooms)}     len(self.room_stack)={len(self.room_stack)}')
 
     def add_room(self):
         # Pop coordinates off room stack.
