@@ -80,7 +80,9 @@ class Map:
                 self.current_coordinates):
             current_room.remove_door(door_to_remove)
 
-        for direction in ['N', 'E', 'S', 'W']:
+        directions_possible = ['N', 'E', 'S', 'W']
+        random.shuffle(directions_possible)
+        for direction in directions_possible:
             current_door = direction
             coordinates = get_adjacent_room_coordinates(self.current_coordinates, direction)
             if self.validate_coordinates(coordinates):
@@ -136,16 +138,16 @@ class Map:
                 current_coordinates = (x, y)
                 if self.check_if_room_exists(current_coordinates):
                     current_room = self.rooms[current_coordinates]
-                    n = '  ' if 'N' in current_room.doors else '--'
+                    n = '      ' if 'N' in current_room.doors else '------'
                     e = ' ' if 'E' in current_room.doors else '|'
-                    s = '  ' if 'S' in current_room.doors else '--'
+                    s = '      ' if 'S' in current_room.doors else '------'
                     w = ' ' if 'W' in current_room.doors else '|'
                     room_text = [
-                        f'+--{n}--+',
-                        f'|      |',
+                        f'+{n}+',
                         f'{w}      {e}',
-                        f'|      |',
-                        f'+--{s}--+'
+                        f'{w}      {e}',
+                        f'{w}      {e}',
+                        f'+{s}+'
                     ]
                 else:
                     room_text = [

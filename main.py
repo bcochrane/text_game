@@ -2,7 +2,7 @@ from game_map import Map
 
 
 def main():
-    map1 = Map()
+    map1 = Map(x_size=10, y_size=10)
     map1.generate_map()
 
     # x_min = map1.map_start_coordinates[0] - 2
