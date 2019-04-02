@@ -51,16 +51,16 @@ class Map:
         self.room_stack = [self.map_start_coordinates]
         self.current_coordinates = None
 
-
         # Map data is stored in a dictionary. The keys are 2-element
         # tuples representing (x, y) coordinates, and the values are
         # Room objects.
         self.rooms = {}
 
     def generate_map(self):
+        # TODO: Add min and max room parameters
+
         while len(self.room_stack) > 0:
             self.add_room()
-            # print(f'len(self.rooms)={len(self.rooms)}     len(self.room_stack)={len(self.room_stack)}')
 
     def add_room(self):
         # Pop coordinates off room stack.
@@ -93,6 +93,7 @@ class Map:
                     # remove door from current room if no matching door in adjacent room
                     if current_door in current_room.doors and opposing_door not in adjacent_room.doors:
                         current_room.remove_door(current_door)
+
                     # add door to current room if matching door in adjacent room
                     elif current_door not in current_room.doors and opposing_door in adjacent_room.doors:
                         current_room.add_door(current_door)
@@ -167,9 +168,9 @@ class Map:
 
 
 class Room:
-    def __init__(self, doors: list, desc: str = ''):
+    def __init__(self, doors: list, description: str = ''):
         self.doors = doors
-        self.desc = desc
+        self.description = description
 
     def add_door(self, door: str):
         if door not in self.doors:
@@ -178,3 +179,13 @@ class Room:
     def remove_door(self, door):
         if door in self.doors:
             self.doors.remove(door)
+
+
+class Entity:
+    def __init__(self, name: str, coordinates: tuple):
+        self.name = name
+        self.coordinates = coordinates
+
+
+class Player(Entity):
+    pass
